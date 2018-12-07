@@ -107,3 +107,4 @@ ENV/
 Tones/
 tts_temp/
 tts_output/
+input_temp.txt
