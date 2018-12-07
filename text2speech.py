@@ -256,7 +256,7 @@ class text2speech:
                 self.tts_events(db)
 
                 print('run_tts_articles is running...')
-                self.tts_events(db)
+                self.tts_articles(db)
 
                 print('sleep in %d seconds' % (config.TIME_TO_SLEEP_ARTICLE))
                 time.sleep(config.TIME_TO_SLEEP_ARTICLE)
