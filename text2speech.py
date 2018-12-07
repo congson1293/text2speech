@@ -91,7 +91,7 @@ class text2speech:
         try:
             collection_tts = db.get_collection(config.MONGO_COLLECTION_TTS_EVENTS)
         except:
-            collection_tts = db.create_collection(config.MONGO_COLLECTION_TTS_ARTICLES)
+            collection_tts = db.create_collection(config.MONGO_COLLECTION_TTS_EVENTS)
 
         try:
             collection_hot_events = db.get_collection(config.MONGO_COLLECTION_HOT_EVENTS_BY_EDITOR)
