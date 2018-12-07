@@ -242,6 +242,10 @@ class text2speech:
         utils.mkdir(config.TTS_FINAL_ARTICLE_OUTPUT_PATH)
         utils.mkdir(config.TTS_FINAL_EVENT_OUTPUT_PATH)
 
+        try:
+            shutil.rmtree(config.TTS_OUTPUT_ROOT_DIR)
+        except: pass
+
         while True:
             try:
                 if self.check_date():
