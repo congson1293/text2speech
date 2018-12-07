@@ -1,0 +1,13 @@
+firstDurationCoeff	0.9
+midDurationCoeff	0.7
+lastDurationCoeff	0.7
+T12	0.4
+T13	0.9
+T46	0.8
+T56	0.4
+P1	1.2
+P2	2.7
+P3	4.2
+P4	4.6
+P5	5.5
+P6	0.9
