@@ -72,6 +72,7 @@ class text2speech:
             output_file_path = self.create_audio_file(contentId, content,
                                                       config.TTS_FINAL_ARTICLE_OUTPUT_PATH)
             collection_tts.insert_one({u'contentId': contentId,
+                                       u'title' : doc[u'title'],
                                        u'relative_path': output_file_path,
                                        u'root_path': self.root_path})
             self.update_collection_time_info(db, config.MONGO_COLLECTION_TTS_ARTICLES)
@@ -136,6 +137,7 @@ class text2speech:
         output_file_path = self.create_audio_file(event_id, event_name,
                                                   config.TTS_FINAL_EVENT_OUTPUT_PATH)
         collection.insert_one({u'event_id': event_id,
+                               u'event_name': event_name,
                                u'relative_path': output_file_path,
                                u'root_path': self.root_path})
         self.update_collection_time_info(db, config.MONGO_COLLECTION_TTS_EVENTS)
