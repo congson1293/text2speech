@@ -51,33 +51,38 @@ class text2speech:
 
 
     def tts_articles(self, db):
-
         try:
             contentId = joblib.load('contentId.pkl')
         except:
             contentId = 0
-
-        collection_summary = db.get_collection(config.MONGO_COLLECTION_SUMMRIES)
 
         try:
             collection_tts = db.get_collection(config.MONGO_COLLECTION_TTS_ARTICLES)
         except:
             collection_tts = db.create_collection(config.MONGO_COLLECTION_TTS_ARTICLES)
 
-        documents = collection_summary.find({u'contentId': {u'$gt': contentId}})
-        for doc in documents:
-            content = u'\n'.join([doc[u'summaries'][self.summary_level].replace(u'_', u' '),
-                                  u'Theo ' + doc[u'publisher']])
-            contentId = doc[u'contentId']
-            output_file_path = self.create_audio_file(contentId, content,
-                                                      config.TTS_FINAL_ARTICLE_OUTPUT_PATH)
-            collection_tts.insert_one({u'contentId': contentId,
-                                       u'title' : doc[u'title'],
-                                       u'relative_path': output_file_path,
-                                       u'root_path': self.root_path})
-            self.update_collection_time_info(db, config.MONGO_COLLECTION_TTS_ARTICLES)
+        try:
+            collection_summary = db.get_collection(config.MONGO_COLLECTION_SUMMRIES)
+            documents = collection_summary.find({u'contentId': {u'$gt': contentId}})
 
-        joblib.dump(contentId, 'contentId.pkl')
+            for doc in documents:
+                try:
+                    content = u'\n'.join([doc[u'summaries'][self.summary_level].replace(u'_', u' '),
+                                          u'Theo ' + doc[u'publisher']])
+                    contentId = doc[u'contentId']
+                    output_file_path = self.create_audio_file(contentId, content,
+                                                              config.TTS_FINAL_ARTICLE_OUTPUT_PATH)
+                    collection_tts.insert_one({u'contentId': contentId,
+                                               u'title' : doc[u'title'],
+                                               u'relative_path': output_file_path,
+                                               u'root_path': self.root_path})
+                    self.update_collection_time_info(db, config.MONGO_COLLECTION_TTS_ARTICLES)
+                except:
+                    continue
+
+            joblib.dump(contentId, 'contentId.pkl')
+        except:
+            pass
 
 
     # tts both hot event and long event
@@ -98,10 +103,13 @@ class text2speech:
             collection_hot_events = db.get_collection(config.MONGO_COLLECTION_HOT_EVENTS_BY_EDITOR)
             documents = collection_hot_events.find()
             for hot in documents:
-                event_id = hot[u'event_id']
-                if not utils.is_exist(self.event_ids, event_id):
-                    self.event_ids.update({event_id : True})
-                    self.save_event_to_mongo(db, collection_tts, event_id, hot[u'event_name'])
+                try:
+                    event_id = hot[u'event_id']
+                    if not utils.is_exist(self.event_ids, event_id):
+                        self.event_ids.update({event_id : True})
+                        self.save_event_to_mongo(db, collection_tts, event_id, hot[u'event_name'])
+                except:
+                    continue
         except:
             pass
 
@@ -119,16 +127,18 @@ class text2speech:
             collection_long_events = db.get_collection(config.MONGO_COLLECTION_LONG_EVENTS)
             documents = collection_long_events.find()
             for long in documents:
-                long_event_id = long[u'event_id']
-                if not utils.is_exist(event_ids, long_event_id):
-                    event_ids.update({long_event_id : True})
-                    self.save_event_to_mongo(db, collection_tts, long_event_id, long[u'event_name'])
-                for child in long[u'child_events']:
-                    child_event_id = child[u'event_id']
-                    if not utils.is_exist(event_ids, child_event_id):
-                        event_ids.update({child_event_id : True})
-                        self.save_event_to_mongo(db, collection_tts, child_event_id, child[u'event_name'])
-
+                try:
+                    long_event_id = long[u'event_id']
+                    if not utils.is_exist(event_ids, long_event_id):
+                        event_ids.update({long_event_id : True})
+                        self.save_event_to_mongo(db, collection_tts, long_event_id, long[u'event_name'])
+                    for child in long[u'child_events']:
+                        child_event_id = child[u'event_id']
+                        if not utils.is_exist(event_ids, child_event_id):
+                            event_ids.update({child_event_id : True})
+                            self.save_event_to_mongo(db, collection_tts, child_event_id, child[u'event_name'])
+                except:
+                    continue
         except:
             pass
 
