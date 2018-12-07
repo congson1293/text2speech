@@ -220,19 +220,51 @@ class text2speech:
                 time.sleep(config.TIME_TO_SLEEP_EVENT)
 
 
+    # def run(self):
+    #     utils.mkdir(config.TTS_FINAL_OUTPUT_ROOT_DIR)
+    #     utils.mkdir(config.TTS_FINAL_ARTICLE_OUTPUT_PATH)
+    #     utils.mkdir(config.TTS_FINAL_EVENT_OUTPUT_PATH)
+    #
+    #     handle_articles = Process(target=self.run_tts_articles)
+    #     handle_articles.start()
+    #
+    #     handle_events = Process(target=self.run_tts_events)
+    #     handle_events.start()
+    #
+    #     while True:
+    #         time.sleep(60 * 60)
+
+
     def run(self):
         utils.mkdir(config.TTS_FINAL_OUTPUT_ROOT_DIR)
         utils.mkdir(config.TTS_FINAL_ARTICLE_OUTPUT_PATH)
         utils.mkdir(config.TTS_FINAL_EVENT_OUTPUT_PATH)
 
-        handle_articles = Process(target=self.run_tts_articles)
-        handle_articles.start()
-
-        handle_events = Process(target=self.run_tts_events)
-        handle_events.start()
-
         while True:
-            time.sleep(60 * 60)
+            try:
+                if self.check_date():
+                    self.event_ids.clear()
+
+                print('connect to mongodb ...')
+                connection, db = utils.connect2mongo(config.MONGO_HOST, config.MONGO_PORT,
+                                                     config.MONGO_USER, config.MONGO_PASS,
+                                                     config.MONGO_DB)
+
+                print('run_tts_events is running...')
+                self.tts_events(db)
+
+                print('run_tts_articles is running...')
+                self.tts_events(db)
+
+                print('sleep in %d seconds' % (config.TIME_TO_SLEEP_ARTICLE))
+                time.sleep(config.TIME_TO_SLEEP_ARTICLE)
+            except:
+                try:
+                    connection.close()
+                except:
+                    pass
+                print('sleep in %d seconds' % (config.TIME_TO_SLEEP_ARTICLE))
+                time.sleep(config.TIME_TO_SLEEP_EVENT)
 
 
 
