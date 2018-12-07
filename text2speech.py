@@ -187,7 +187,7 @@ class text2speech:
                     connection.close()
                 except:
                     pass
-                time.sleep(config.TIME_TO_SLEEP)
+                time.sleep(config.TIME_TO_SLEEP_ARTICLE)
 
 
     def run_tts_events(self):
@@ -208,7 +208,7 @@ class text2speech:
                     connection.close()
                 except:
                     pass
-                time.sleep(config.TIME_TO_SLEEP)
+                time.sleep(config.TIME_TO_SLEEP_EVENT)
 
 
     def run(self):
