@@ -174,6 +174,7 @@ class text2speech:
 
     def run_tts_articles(self):
         while True:
+            print('run_tts_articles is running...')
             try:
                 print('connect to mongodb ...')
                 connection, db = utils.connect2mongo(config.MONGO_HOST, config.MONGO_PORT,
@@ -182,17 +183,22 @@ class text2speech:
 
                 self.tts_articles(db)
 
+                print('run_tts_articles sleep in %d seconds' % (config.TIME_TO_SLEEP_ARTICLE))
+                time.sleep(config.TIME_TO_SLEEP_ARTICLE)
+
             except:
                 try:
                     connection.close()
                 except:
                     pass
+                print('run_tts_articles sleep in %d seconds' % (config.TIME_TO_SLEEP_ARTICLE))
                 time.sleep(config.TIME_TO_SLEEP_ARTICLE)
 
 
     def run_tts_events(self):
         while True:
             try:
+                print('run_tts_events is running...')
                 if self.check_date():
                     self.event_ids.clear()
 
@@ -203,11 +209,14 @@ class text2speech:
 
                 self.tts_events(db)
 
+                print('run_tts_articles sleep in %d seconds' % (config.TIME_TO_SLEEP_EVENT))
+                time.sleep(config.TIME_TO_SLEEP_EVENT)
             except:
                 try:
                     connection.close()
                 except:
                     pass
+                print('run_tts_articles sleep in %d seconds' % (config.TIME_TO_SLEEP_EVENT))
                 time.sleep(config.TIME_TO_SLEEP_EVENT)
 
 
