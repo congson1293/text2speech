@@ -8,7 +8,7 @@ from io import open
 import shutil
 from bson.objectid import ObjectId
 import datetime
-from multiprocessing import Process
+# from multiprocessing import Process
 
 
 
@@ -29,25 +29,6 @@ class text2speech:
             self.date = present.date()
             return True
         return False
-
-
-    def update_collection_time_info(self, db, collection_name):
-        try:
-            collection = db.get_collection(config.MONGO_COLLECTION_UPDATE_TIME)
-        except:
-            collection = db.create_collection(config.MONGO_COLLECTION_UPDATE_TIME)
-
-        now = utils.get_time_at_present()
-
-        try:
-            document = collection.find_one({u'name': {u'$eq': collection_name}}, max_time_ms=1000)
-            _id = ObjectId(document[u'_id'])
-            collection.update_one({u'_id': _id},
-                                  {u'$set': {u'update_time' : now}})
-        except:
-            collection.insert_one({u'name' : collection_name,
-                                   u'create_time' : now,
-                                   u'update_time' : now})
 
 
     def tts_articles(self, db):
@@ -72,11 +53,12 @@ class text2speech:
                     contentId = doc[u'contentId']
                     output_file_path = self.create_audio_file(contentId, content,
                                                               config.TTS_FINAL_ARTICLE_OUTPUT_PATH)
+                    now = utils.get_time_at_present()
                     collection_tts.insert_one({u'contentId': contentId,
                                                u'title' : doc[u'title'],
                                                u'relative_path': output_file_path,
-                                               u'root_path': self.root_path})
-                    self.update_collection_time_info(db, config.MONGO_COLLECTION_TTS_ARTICLES)
+                                               u'root_path': self.root_path,
+                                               u'updated_at': now})
                 except:
                     continue
 
@@ -107,7 +89,7 @@ class text2speech:
                     event_id = hot[u'event_id']
                     if not utils.is_exist(self.event_ids, event_id):
                         self.event_ids.update({event_id : True})
-                        self.save_event_to_mongo(db, collection_tts, event_id, hot[u'event_name'])
+                        self.save_event_to_mongo(collection_tts, event_id, hot[u'event_name'])
                 except:
                     continue
         except:
@@ -131,26 +113,27 @@ class text2speech:
                     long_event_id = long[u'event_id']
                     if not utils.is_exist(event_ids, long_event_id):
                         event_ids.update({long_event_id : True})
-                        self.save_event_to_mongo(db, collection_tts, long_event_id, long[u'event_name'])
+                        self.save_event_to_mongo(collection_tts, long_event_id, long[u'event_name'])
                     for child in long[u'child_events']:
                         child_event_id = child[u'event_id']
                         if not utils.is_exist(event_ids, child_event_id):
                             event_ids.update({child_event_id : True})
-                            self.save_event_to_mongo(db, collection_tts, child_event_id, child[u'event_name'])
+                            self.save_event_to_mongo(collection_tts, child_event_id, child[u'event_name'])
                 except:
                     continue
         except:
             pass
 
 
-    def save_event_to_mongo(self, db, collection, event_id, event_name):
+    def save_event_to_mongo(self, collection, event_id, event_name):
         output_file_path = self.create_audio_file(event_id, event_name,
                                                   config.TTS_FINAL_EVENT_OUTPUT_PATH)
+        now = utils.get_time_at_present()
         collection.insert_one({u'event_id': event_id,
                                u'event_name': event_name,
                                u'relative_path': output_file_path,
-                               u'root_path': self.root_path})
-        self.update_collection_time_info(db, config.MONGO_COLLECTION_TTS_EVENTS)
+                               u'root_path': self.root_path,
+                               u'updated_at': now})
 
 
     def create_audio_file(self, output_filename, content, output_path):
