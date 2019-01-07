@@ -62,6 +62,7 @@ class text2speech:
                                                u'updated_at': now})
                 except:
                     continue
+                time.sleep(5)
 
             joblib.dump(contentId, 'contentId.pkl')
         except:
@@ -93,6 +94,7 @@ class text2speech:
                         self.save_event_to_mongo(collection_tts, event_id, hot[u'event_name'])
                 except:
                     continue
+                time.sleep(5)
         except:
             pass
 
