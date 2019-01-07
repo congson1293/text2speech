@@ -56,6 +56,7 @@ class text2speech:
                     now = utils.get_time_at_present()
                     collection_tts.insert_one({u'contentId': contentId,
                                                u'title' : doc[u'title'],
+                                               u'content' : content,
                                                u'relative_path': output_file_path,
                                                u'root_path': self.root_path,
                                                u'updated_at': now})
