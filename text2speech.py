@@ -20,6 +20,7 @@ class text2speech:
         self.summary_level = u'medium'
         self.first_run = firs_run
         self.event_ids = {}
+        self.date = datetime.now()
 
 
     def check_date(self, date_obj):
@@ -68,8 +69,8 @@ class text2speech:
                 time.sleep(5)
 
             joblib.dump(contentId, 'contentId.pkl')
-        except:
-            pass
+        except Exception as e:
+            print('exception raise in tts_articles: %s' % (e.message)
 
 
     # tts both hot event and long event
@@ -194,7 +195,8 @@ class text2speech:
         while True:
             try:
                 print('run_tts_events is running...')
-                if self.check_date(datetime.now()):
+                if self.check_date(self.date):
+                    self.date = datetime.now()
                     self.event_ids.clear()
 
                 print('connect to mongodb ...')
@@ -236,9 +238,6 @@ class text2speech:
 
         while True:
             try:
-                if self.check_date(datetime.now()):
-                    self.event_ids.clear()
-
                 print('connect to mongodb ...')
                 connection, db = utils.connect2mongo(config.MONGO_HOST, config.MONGO_PORT,
                                                      config.MONGO_USER, config.MONGO_PASS,
