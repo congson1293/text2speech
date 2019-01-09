@@ -70,7 +70,7 @@ class text2speech:
 
             joblib.dump(contentId, 'contentId.pkl')
         except Exception as e:
-            print('exception raise in tts_articles: %s' % (e.message)
+            print('exception raise in tts_articles: %s' % (e.message))
 
 
     # tts both hot event and long event
