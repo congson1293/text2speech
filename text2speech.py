@@ -7,7 +7,8 @@ import time
 from io import open
 import shutil
 from bson.objectid import ObjectId
-import datetime
+from datetime import datetime
+from dateutil.parser import parse
 # from multiprocessing import Process
 
 
@@ -19,14 +20,13 @@ class text2speech:
         self.summary_level = u'medium'
         self.first_run = firs_run
         self.event_ids = {}
-        self.date = datetime.datetime.now().date()
 
 
-    def check_date(self):
-        present = datetime.datetime.now()
-        diff = present.date() - self.date
-        if diff.days > 0 and present.hour == config.HOUR_TO_RESET:
-            self.date = present.date()
+    def check_date(self, date_obj):
+        datetime_obj = date_obj.date()
+        now = datetime.now()
+        diff = now.date() - datetime_obj
+        if diff.days != 0:
             return True
         return False
 
@@ -48,6 +48,9 @@ class text2speech:
 
             for doc in documents:
                 try:
+                    date_obj = parse(doc[u'date'])
+                    if self.check_date(date_obj):
+                        continue
                     content = u'\n'.join([doc[u'summaries'][self.summary_level].replace(u'_', u' '),
                                           u'Theo ' + doc[u'publisher']])
                     contentId = doc[u'contentId']
@@ -180,24 +183,18 @@ class text2speech:
                                                      config.MONGO_DB)
 
                 self.tts_articles(db)
-
-                print('run_tts_articles sleep in %d seconds' % (config.TIME_TO_SLEEP_ARTICLE))
-                time.sleep(config.TIME_TO_SLEEP_ARTICLE)
-
             except:
                 try:
                     connection.close()
                 except:
                     pass
-                print('run_tts_articles sleep in %d seconds' % (config.TIME_TO_SLEEP_ARTICLE))
-                time.sleep(config.TIME_TO_SLEEP_ARTICLE)
 
 
     def run_tts_events(self):
         while True:
             try:
                 print('run_tts_events is running...')
-                if self.check_date():
+                if self.check_date(datetime.now()):
                     self.event_ids.clear()
 
                 print('connect to mongodb ...')
@@ -206,16 +203,11 @@ class text2speech:
                                                      config.MONGO_DB)
 
                 self.tts_events(db)
-
-                print('run_tts_articles sleep in %d seconds' % (config.TIME_TO_SLEEP_EVENT))
-                time.sleep(config.TIME_TO_SLEEP_EVENT)
             except:
                 try:
                     connection.close()
                 except:
                     pass
-                print('run_tts_articles sleep in %d seconds' % (config.TIME_TO_SLEEP_EVENT))
-                time.sleep(config.TIME_TO_SLEEP_EVENT)
 
 
     # def run(self):
@@ -244,7 +236,7 @@ class text2speech:
 
         while True:
             try:
-                if self.check_date():
+                if self.check_date(datetime.now()):
                     self.event_ids.clear()
 
                 print('connect to mongodb ...')
@@ -258,15 +250,15 @@ class text2speech:
                 print('run_tts_articles is running...')
                 self.tts_articles(db)
 
-                print('sleep in %d seconds' % (config.TIME_TO_SLEEP_ARTICLE))
-                time.sleep(config.TIME_TO_SLEEP_ARTICLE)
+                print('sleep in %d seconds' % (config.TIME_TO_SLEEP))
+                time.sleep(config.TIME_TO_SLEEP)
             except:
                 try:
                     connection.close()
                 except:
                     pass
-                print('sleep in %d seconds' % (config.TIME_TO_SLEEP_ARTICLE))
-                time.sleep(config.TIME_TO_SLEEP_EVENT)
+                print('sleep in %d seconds' % (config.TIME_TO_SLEEP))
+                time.sleep(config.TIME_TO_SLEEP)
 
 
 
