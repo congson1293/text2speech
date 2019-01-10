@@ -67,7 +67,8 @@ class text2speech:
                                                u'relative_path': output_file_path,
                                                u'root_path': self.root_path,
                                                u'updated_at': now})
-                except:
+                except Exception as e:
+                    print(e.message)
                     continue
                 time.sleep(5)
 
