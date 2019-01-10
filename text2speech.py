@@ -1,12 +1,11 @@
 # -*- encoding: utf-8 -*-
 
-import subprocess, os
+import subprocess, os, sys
 import utils, config
 from sklearn.externals import joblib
 import time
 from io import open
 import shutil
-from bson.objectid import ObjectId
 from datetime import datetime
 from dateutil.parser import parse
 # from multiprocessing import Process
@@ -47,11 +46,15 @@ class text2speech:
             collection_summary = db.get_collection(config.MONGO_COLLECTION_SUMMRIES)
             documents = collection_summary.find({u'contentId': {u'$gt': contentId}})
 
-            for doc in documents:
+            for i, doc in enumerate(documents):
                 try:
+                    print('\r%d - %s' % (i, doc[u'date'])),
+                    sys.stdout.flush()
                     date_obj = parse(doc[u'date'])
                     if self.check_date(date_obj):
                         continue
+                    print('\nfinish')
+                    break
                     content = u'\n'.join([doc[u'summaries'][self.summary_level].replace(u'_', u' '),
                                           u'Theo ' + doc[u'publisher']])
                     contentId = doc[u'contentId']
@@ -243,10 +246,10 @@ class text2speech:
                                                      config.MONGO_USER, config.MONGO_PASS,
                                                      config.MONGO_DB)
 
-                print('run_tts_events is running...')
-                self.tts_events(db)
+                # print('tts_events is running...')
+                # self.tts_events(db)
 
-                print('run_tts_articles is running...')
+                print('tts_articles is running...')
                 self.tts_articles(db)
 
                 print('sleep in %d seconds' % (config.TIME_TO_SLEEP))
