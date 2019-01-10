@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-import subprocess, os, sys
+import subprocess, os
 import utils, config
 from sklearn.externals import joblib
 import time
@@ -46,15 +46,14 @@ class text2speech:
             collection_summary = db.get_collection(config.MONGO_COLLECTION_SUMMRIES)
             documents = collection_summary.find({u'contentId': {u'$gt': contentId}})
 
-            for i, doc in enumerate(documents):
+            for doc in documents:
                 try:
-                    print('\r%d - %s' % (i, doc[u'date'])),
-                    sys.stdout.flush()
-                    date_obj = parse(doc[u'date'])
+                    try:
+                        date_obj = parse(doc[u'date'])
+                    except:
+                        date_obj = doc[u'date']
                     if self.check_date(date_obj):
                         continue
-                    print('\nfinish')
-                    break
                     content = u'\n'.join([doc[u'summaries'][self.summary_level].replace(u'_', u' '),
                                           u'Theo ' + doc[u'publisher']])
                     contentId = doc[u'contentId']
@@ -247,8 +246,11 @@ class text2speech:
                                                      config.MONGO_USER, config.MONGO_PASS,
                                                      config.MONGO_DB)
 
-                # print('tts_events is running...')
-                # self.tts_events(db)
+                print('tts_events is running...')
+                if self.check_date(self.date):
+                    self.date = datetime.now()
+                    self.event_ids.clear()
+                self.tts_events(db)
 
                 print('tts_articles is running...')
                 self.tts_articles(db)
