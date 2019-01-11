@@ -59,7 +59,7 @@ class text2speech:
                     contentId = doc[u'contentId']
                     output_file_path = self.create_audio_file(contentId, content,
                                                               config.TTS_FINAL_ARTICLE_OUTPUT_PATH)
-                    now = utils.get_time_at_present()
+                    now = datetime.now()
                     collection_tts.insert_one({u'contentId': contentId,
                                                u'title' : doc[u'title'],
                                                u'content' : content,
@@ -138,7 +138,7 @@ class text2speech:
     def save_event_to_mongo(self, collection, event_id, event_name):
         output_file_path = self.create_audio_file(event_id, event_name,
                                                   config.TTS_FINAL_EVENT_OUTPUT_PATH)
-        now = utils.get_time_at_present()
+        now = datetime.now()
         collection.insert_one({u'event_id': event_id,
                                u'event_name': event_name,
                                u'relative_path': output_file_path,
