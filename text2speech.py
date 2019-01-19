@@ -31,16 +31,16 @@ class text2speech:
         return False
 
 
-    def tts_articles(self, db):
+    def tts_articles(self, db, db_product):
         try:
             contentId = joblib.load('contentId.pkl')
         except:
             contentId = 0
 
         try:
-            collection_tts = db.get_collection(config.MONGO_COLLECTION_TTS_ARTICLES)
+            collection_tts = db_product.get_collection(config.MONGO_COLLECTION_TTS_ARTICLES)
         except:
-            collection_tts = db.create_collection(config.MONGO_COLLECTION_TTS_ARTICLES)
+            collection_tts = db_product.create_collection(config.MONGO_COLLECTION_TTS_ARTICLES)
 
         try:
             collection_summary = db.get_collection(config.MONGO_COLLECTION_SUMMRIES)
@@ -77,18 +77,18 @@ class text2speech:
 
 
     # tts both hot event and long event
-    def tts_events(self, db):
+    def tts_events(self, db, db_product):
         if self.first_run:
             self.first_run = True
-            self.tts_long_event(db)
-        self.tts_hot_event(db)
+            self.tts_long_event(db, db_product)
+        self.tts_hot_event(db, db_product)
 
 
-    def tts_hot_event(self, db):
+    def tts_hot_event(self, db, db_product):
         try:
-            collection_tts = db.get_collection(config.MONGO_COLLECTION_TTS_EVENTS)
+            collection_tts = db_product.get_collection(config.MONGO_COLLECTION_TTS_EVENTS)
         except:
-            collection_tts = db.create_collection(config.MONGO_COLLECTION_TTS_EVENTS)
+            collection_tts = db_product.create_collection(config.MONGO_COLLECTION_TTS_EVENTS)
 
         try:
             collection_hot_events = db.get_collection(config.MONGO_COLLECTION_HOT_EVENTS_BY_EDITOR)
@@ -107,13 +107,13 @@ class text2speech:
 
 
 
-    def tts_long_event(self, db):
+    def tts_long_event(self, db, db_product):
         event_ids = {}
 
         try:
-            collection_tts = db.get_collection(config.MONGO_COLLECTION_TTS_EVENTS)
+            collection_tts = db_product.get_collection(config.MONGO_COLLECTION_TTS_EVENTS)
         except:
-            collection_tts = db.create_collection(config.MONGO_COLLECTION_TTS_EVENTS)
+            collection_tts = db_product.create_collection(config.MONGO_COLLECTION_TTS_EVENTS)
 
         try:
             collection_long_events = db.get_collection(config.MONGO_COLLECTION_LONG_EVENTS)
@@ -246,20 +246,30 @@ class text2speech:
                                                      config.MONGO_USER, config.MONGO_PASS,
                                                      config.MONGO_DB)
 
+                connection_product, db_product = utils.connect2mongo(config.MONGO_HOST_PRODUCT,
+                                                                     config.MONGO_PORT_PRODUCT,
+                                                                     config.MONGO_USER_PRODUCT,
+                                                                     config.MONGO_PASS_PRODUCT,
+                                                                     config.MONGO_DB_PRODUCT)
+
                 print('tts_events is running...')
                 if self.check_date(self.date):
                     self.date = datetime.now()
                     self.event_ids.clear()
-                self.tts_events(db)
+                self.tts_events(db, db_product)
 
                 print('tts_articles is running...')
-                self.tts_articles(db)
+                self.tts_articles(db, db_product)
+
+                connection.close()
+                connection_product.close()
 
                 print('sleep in %d seconds' % (config.TIME_TO_SLEEP))
                 time.sleep(config.TIME_TO_SLEEP)
             except:
                 try:
                     connection.close()
+                    connection_product.close()
                 except:
                     pass
                 print('sleep in %d seconds' % (config.TIME_TO_SLEEP))
